@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사진 보정 요청 폼</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .form-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .form-group label {
+            flex: 0 0 150px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea,
+        .form-group button {
+            flex: 1;
+            padding: 8px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+        }
+        .form-group-inline {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .form-group-inline label {
+            flex: none;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .info-text {
+            color: red;
+            font-size: 0.9em;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>사진 보정 요청 폼</h2>
+        <form id="request-form">
+            <!-- 성함 및 보정 종류 -->
+            <div class="form-group">
+                <label for="name">성함</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="correction-type">보정 종류</label>
+                <select id="correction-type" name="correction-type" required>
+                    <option value="일반보정">일반보정</option>
+                    <option value="특수보정">특수보정</option>
+                </select>
+
+                <label for="photo-count">사진 장수</label>
+                <input type="number" id="photo-count" name="photo-count" required>
+            </div>
+
+            <!-- 파일 업로드 -->
+            <div class="form-group">
+                <label for="photo-upload">접수할 사진 업로드</label>
+                <input type="file" id="photo-upload" name="photo-upload" multiple>
+            </div>
+
+            <!-- 요청사항 작성 -->
+            <h3>요청사항 작성</h3>
+
+            <div class="form-group-inline">
+                <label><input type="checkbox" id="brightness" name="brightness"> 밝기보정</label>
+                <label><input type="checkbox" id="color" name="color"> 색감보정</label>
+            </div>
+
+            <div class="form-group">
+                <label for="groom">신랑 요청사항</label>
+                <textarea id="groom" name="groom" rows="2" placeholder="어깨넓게 / 턱선살리기"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="bride">신부 요청사항</label>
+                <textarea id="bride" name="bride" rows="2" placeholder="중안부 조금 짧게 / 팔뚝 얇게"></textarea>
+            </div>
+
+            <p class="info-text">
+                * 유의사항: 요청사항은 간단하게 작성해주세요. 작업불가 요청은 거절될 수 있습니다.
+            </p>
+
+            <!-- 사진별 요청사항 -->
+            <div class="form-group">
+                <label for="individual-requests">사진별 요청사항</label>
+                <textarea id="individual-requests" name="individual-requests" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="studio-name">스튜디오명</label>
+                <input type="text" id="studio-name" name="studio-name">
+            </div>
+
+            <button type="button" id="submit-btn">작성 완료</button>
+        </form>
+    </div>
+
+    <div id="result-container" class="result-container hidden">
+        <h3>작성 결과</h3>
+        <div id="result"></div>
+        <button id="copy-btn">복사하기</button>
+    </div>
+
+    <script>
+        document.getElementById('submit-btn').addEventListener('click', () => {
+            const name = document.getElementById('name').value;
+            const correctionType = document.getElementById('correction-type').value;
+            const photoCount = document.getElementById('photo-count').value;
+            const brightness = document.getElementById('brightness').checked ? '밝기보정' : '';
+            const color = document.getElementById('color').checked ? '색감보정' : '';
+            const groom = document.getElementById('groom').value;
+            const bride = document.getElementById('bride').value;
+            const individualRequests = document.getElementById('individual-requests').value;
+            const studioName = document.getElementById('studio-name').value;
+
+            if (!name || !correctionType || !photoCount) {
+                alert('필수 필드를 모두 입력해주세요.');
+                return;
+            }
+
+            const commonRequests = [brightness, color].filter(Boolean).join(', ') || '없음';
+            const resultText = `
+${name} / ${correctionType} / ${photoCount}장
+
+💌 공통 요청사항
+${commonRequests}
+
+💌 신랑 요청사항
+${groom || '없음'}
+
+💌 신부 요청사항
+${bride || '없음'}
+
+💌 사진별 요청사항
+${individualRequests || '없음'}
+
+스튜디오명: ${studioName || '없음'}
+            `;
+
+            document.getElementById('result').textContent = resultText.trim();
+            document.getElementById('result-container').classList.remove('hidden');
+        });
+
+        document.getElementById('copy-btn').addEventListener('click', () => {
+            const resultText = document.getElementById('result').textContent;
+            navigator.clipboard.writeText(resultText).then(() => {
+                alert('내용이 복사되었습니다.');
+            }).catch(err => {
+                alert('복사에 실패했습니다: ' + err);
+            });
+        });
+    </script>
+</body>
+</html>
